@@ -137,3 +137,118 @@ body {
   .hero-input-fake { flex-direction: row; padding: 14px 16px; }
   .hero-sub { font-size: 15px; }
 }
+
+/* ── Live session panel ──────────────────────────────────────────
+   Renders metadata_notify events pushed by the flow in real time,
+   during both chat and voice (WebRTC) sessions. Hidden until the
+   first event arrives. */
+:root {
+  --live-info: 201 96% 32%;     /* matches --primary */
+  --live-success: 152 62% 30%;
+  --live-warn: 32 92% 38%;
+  --live-danger: 0 68% 42%;
+}
+
+.live-panel {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  max-height: 60vh;
+  background: #fff;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.18);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  overflow: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.live-panel[hidden] { display: none; }
+
+.live-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 13px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+.live-panel-header .live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.live-panel-header .live-title { flex: 1; }
+.live-panel-close {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.live-panel-close:hover { color: #475569; }
+
+.live-log {
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.live-entry {
+  border-left: 3px solid hsl(var(--live-info));
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  animation: liveEntryIn 0.25s ease both;
+}
+@keyframes liveEntryIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.live-entry.tone-success { border-left-color: hsl(var(--live-success)); }
+.live-entry.tone-warn { border-left-color: hsl(var(--live-warn)); }
+.live-entry.tone-danger { border-left-color: hsl(var(--live-danger)); }
+
+.live-entry-title {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.live-entry-title .live-entry-time {
+  font-weight: 400;
+  color: #94a3b8;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+.live-entry-detail { color: #475569; margin-top: 2px; }
+.live-entry-detail div { margin-top: 1px; }
+.live-entry-divider {
+  text-align: center;
+  font-size: 10.5px;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+@media (max-width: 640px) {
+  .live-panel { left: 12px; right: 12px; width: auto; bottom: 12px; }
+}

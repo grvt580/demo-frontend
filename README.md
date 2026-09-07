@@ -7,13 +7,23 @@ Live agent capabilities demoed here: password reset, VPN troubleshooting, device
 ## Structure
 
 ```
-index.html          hero page + widget mount/init scripts
+index.html          hero page + widget mount/init scripts + live session panel markup
 config.js           per-vertical settings (customer name, avatar, endpoint URLs, brand color)
-css/theme.css        page theme tokens + hero styling
+live-session.js      parses metadata_notify events and renders the live session panel
+css/theme.css        page theme tokens + hero styling + live session panel styling
 css/webchat.css       Cognigy Webchat v3 branding overrides
 css/webrtc.css        Cognigy Click-to-Call (WebRTC) branding overrides
 assets/sora-avatar.png  Sora's agent avatar, pulled from the live Cognigy project
 ```
+
+## Live session panel (metadata_notify)
+
+The OneTechSupport flow pushes structured progress updates mid-conversation via a shared `metadata_notify` sub-flow — e.g. "verifying identity", "device health check", "VPN diagnostic result", "password reset sent". `live-session.js` listens for these on both channels and renders them as a real-time timeline, bottom-left on the page:
+
+- **Chat** — `metadata_notify`'s "Send Metadata Chat" code node runs `api.output("", context.notifyMeta)`. Client-side this arrives via the [Webchat Analytics API](https://github.com/Cognigy/Webchat/blob/main/docs/analytics-api.md): `webchat.registerAnalyticsService(event => ...)`, with `event.type === "webchat/incoming-message"` and the payload in `event.payload.data`.
+- **Voice** — `metadata_notify`'s "Send Metadata WebRTC" node is a native `sendMetadata` (Voice Gateway) node, delivered over the call's SIP INFO channel. Client-side this arrives via `session.on("newInfo", data => ...)` (from `widget.on("newRTCSession", ...)`), with the payload in `data.info.body`.
+
+Both deliver the same string: `context.notifyMeta`, which is `JSON.stringify({ action, metaJson })` where `metaJson` is *itself* a JSON string — `live-session.js` parses both layers. The 8 `action` values the flow currently emits (verified directly from the flow's exported node code, not guessed): `employee_verify`, `employee_found`, `device_health`, `vpn_diagnostic`, `password_reset`, `live_agent`, `call_ended`, `home` (the last one clears the timeline — it marks a return to the main menu). Each has its own renderer in `live-session.js`; unrecognized actions still render generically rather than being dropped silently, so a new `action` the flow starts sending shows up immediately instead of disappearing.
 
 ## How it's wired
 
