@@ -1,4 +1,4 @@
-# OneTechSupport Demo — Sora
+# Demo Frontend — OneTechSupport (Sora)
 
 A standalone, branded frontend for the **OneTechSupport** Cognigy flow (agent **Sora**). Employees can chat or start a WebRTC voice call with Sora directly from the page; both channels connect to the live Cognigy flow, so the transcript renders in real time as the conversation happens.
 
@@ -35,16 +35,9 @@ python -m http.server 8080
 
 then open `http://localhost:8080`.
 
-## Publishing
+## Live
 
-This folder is its own git repo (sibling to `airline-irop-demo` and `oneretail-demo`). To publish via GitHub Pages:
-
-```bash
-git remote add origin <your-repo-url>
-git push -u origin main
-```
-
-Then enable GitHub Pages for the repo (Settings → Pages → Deploy from branch → `main` / root).
+Published at **https://github.com/grvt580/demo-frontend** and served via GitHub Pages at **https://grvt580.github.io/demo-frontend/** (branch `main`, root).
 
 ## Reusing this for another vertical
 
