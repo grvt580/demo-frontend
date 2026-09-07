@@ -1,0 +1,45 @@
+/* Click-to-Call (WebRTC) widget custom CSS — branded for OneTechSupport / Sora. */
+
+/* Z-index fix — keep the transcript above page content with positive z-index. */
+.webrtc_widget_outer_wrapper { z-index: 9998 !important; }
+
+/* Hide the "powered by Cognigy" footer in the widget. */
+.webrtc_widget_powered_by { display: none !important; }
+
+/* Branded call button — primary theme color with matching drop-shadow. */
+.webrtc_widget_call_button {
+  background: #0369a1 !important;
+  box-shadow: 0 4px 14px #0369a159 !important;
+}
+
+/* Subtle pulse on the agent avatar so it feels alive. Remove the animation rule to disable. */
+.webrtc_widget_avatar { animation: aishAvatarPulse 2.4s ease-in-out infinite; }
+@keyframes aishAvatarPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+
+/* Avatar image — Sora's avatar (center-top crop biases up). */
+.webrtc_widget_content_logo .webrtc_widget_avatar {
+  background-image: url("../assets/sora-avatar.png") !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  /* Sora's avatar is a PNG cutout with an alpha channel, so what sits behind
+     it is what fills the circle. Without this the widget's white shell shows
+     through. border-radius is forced so the element stays circular if the
+     vendor restyles it. */
+  background-color: #0369a1 !important;
+  border-radius: 50% !important;
+}
+
+/* Hide the widget's own avatar artwork while keeping the div's width/height (use
+   visibility, not display). Older widget builds render an inline <svg> icon,
+   current ones render an <img> with a base64 default — without hiding both,
+   the default paints over Sora's avatar and it never appears. */
+.webrtc_widget_content_logo .webrtc_widget_avatar svg,
+.webrtc_widget_content_logo .webrtc_widget_avatar img {
+  visibility: hidden !important;
+}
+
+/* Center the call-button label content (the "Call OneTechSupport" wrapper). */
+.webrtc_widget_content { text-align: center !important; }

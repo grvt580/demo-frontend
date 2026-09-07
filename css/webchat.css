@@ -1,0 +1,234 @@
+/* Webchat custom CSS — branded for OneTechSupport / Sora.
+   Edit the two values below if you reuse this file for another vertical. */
+
+/* Force the widget's outer shell opaque on first mount (skips Cognigy's default
+   fade-in). Scoped to the root element only — NOT every descendant. Cognigy's
+   screen transitions (homescreen -> active chat) animate an inner screen's own
+   opacity to swap views; forcing opacity:1 on every descendant fights that and
+   leaves both screens stacked and visible at once. */
+html body div:has(> div[data-cognigy-webchat-root="true"]) { opacity: 1 !important; }
+div[data-cognigy-webchat-root="true"] { opacity: 1 !important; }
+
+/* Hide Cognigy's logo SVGs in the homescreen header, chat header, and previous-
+   conversations list items (each prev-conv item shows a small avatar on the left). */
+.webchat-homescreen-header .webchat-homescreen-header-cognigy-logo,
+.webchat-header-logo-name-container .webchat-header-cognigy-logo,
+.webchat-prev-conversations-item .webchat-header-cognigy-logo {
+  display: none !important;
+}
+
+/* Previous-conversations list — replace each item's Cognigy logo container with the demo avatar. */
+.webchat-prev-conversations-item > div:has(> .webchat-header-cognigy-logo) {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background: url("../assets/sora-avatar.png") center top / cover no-repeat, #0369a1 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hide the project-configured logo images (homescreen and active chat header). */
+.webchat-homescreen-header-logo,
+.webchat-header-logo { display: none !important; }
+
+/* Homescreen header — render the company name where the Cognigy logo used to be. */
+.webchat-homescreen-header::before {
+  content: "OneTechSupport" !important;
+  display: block !important;
+  text-align: center !important;
+  width: 100% !important;
+  padding: 10px 0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.4px !important;
+  color: #075985 !important;
+}
+
+/* Chat header h2 — hide original "Cognigy Webchat" text (keeps box-model for layout). */
+[data-cognigy-webchat-root] h2.webchat-header-title {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+
+/* Chat header h2 — paint the company name in dark theme color so it's readable on Cognigy's white bar. */
+[data-cognigy-webchat-root] h2.webchat-header-title::after {
+  content: "OneTechSupport" !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #075985 !important;
+  letter-spacing: -0.2px;
+}
+
+/* Message-bubble sender label — hide original bot/project name. */
+[data-cognigy-webchat-root] [data-testid="sender-name"] {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+
+/* Message-bubble sender label — paint the agent's name in its place. */
+[data-cognigy-webchat-root] [data-testid="sender-name"]::after {
+  content: "Sora" !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #075985 !important;
+}
+
+/* Message-bubble bot avatar — replace Cognigy's default SVG logo with Sora's avatar; object-position
+   center top biases the crop upward so faces aren't cut off. */
+[data-cognigy-webchat-root] [data-testid="bot-avatar"] {
+  content: url("../assets/sora-avatar.png") !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  background: #0369a1 !important;
+}
+
+/* AI-agent handoff notice — hide the default "You're now chatting with an AI Agent." text. */
+[data-cognigy-webchat-root] .webchat-log-ai-agent-notice-text {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+
+/* AI-agent handoff notice — replace with the brand-aware message. */
+[data-cognigy-webchat-root] .webchat-log-ai-agent-notice-text::after {
+  content: "You're now chatting with Sora, your OneTechSupport specialist" !important;
+  font-size: 14px !important;
+  color: #475569 !important;
+}
+
+/* Homescreen body — two-tone background: light top 33%, theme-dark bottom 67%.
+   Targets the stable BEM class (webchat-homescreen-root), not the hashed
+   CSS-in-JS class next to it — that hash regenerates per Webchat build. */
+[data-cognigy-webchat-root] .webchat-homescreen-root {
+  background: linear-gradient(to bottom, transparent 33%, #075985 33%) !important;
+}
+
+/* Homescreen welcome title — use theme dark so it's readable on the light top band. */
+[data-cognigy-webchat-root] h3.webchat-homescreen-title { color: #075985 !important; }
+
+/* Homescreen body text under the welcome title — same readability fix. */
+[data-cognigy-webchat-root] .webchat-homescreen-body,
+[data-cognigy-webchat-root] .webchat-homescreen-content { color: #075985 !important; }
+
+/* Homescreen body ::after — rounded avatar hero card; background-position center top biases crop upward. */
+[data-cognigy-webchat-root] .webchat-homescreen-root::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 15% !important;
+  left: 50% !important;
+  transform: translate(-50%, 20%) !important;
+  width: 220px !important;
+  height: 220px !important;
+  border-radius: 20px !important;
+  background: url("../assets/sora-avatar.png") center top / cover no-repeat, #0369a1 !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25) !important;
+}
+
+/* Homescreen close button — white pill so the dark icon is visible on themed headers. */
+.webchat-homescreen-close-button {
+  background-color: rgba(255,255,255,0.92) !important;
+  color: #075985 !important;
+  border-radius: 9999px !important;
+  width: 32px !important;
+  height: 32px !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+}
+
+/* Homescreen close button — recolor the X icon to match the dark theme color. */
+.webchat-homescreen-close-button svg path { fill: #075985 !important; }
+
+/* Widget panel size — change these to make the webchat wider/taller. */
+[data-cognigy-webchat-root] [data-cognigy-webchat] {
+  width: 420px !important;
+  height: 720px !important;
+}
+
+/* Send-message button icon — recolor to the demo's primary theme color. */
+[data-cognigy-webchat-root] .webchat-input-button-send svg path { fill: #0369a1 !important; }
+
+/* Webchat toggle button (the floating chat icon) — match the demo's primary theme color.
+   Cognigy ships a CSS background-image on this button (gradient/pattern), so we
+   blank the background-image too — otherwise the image would mask our solid color. */
+#webchatWindowToggleButton,
+button.webchat-toggle-button,
+button[data-cognigy-webchat-toggle="true"],
+[data-cognigy-webchat-root="true"] button.webchat-toggle-button {
+  background-image: none !important;
+  background-color: #0369a1 !important;
+  border-color: #0369a1 !important;
+  transition: transform 0.15s ease, background-color 0.15s ease !important;
+  will-change: transform;
+}
+#webchatWindowToggleButton:hover,
+button.webchat-toggle-button:hover,
+button[data-cognigy-webchat-toggle="true"]:hover,
+[data-cognigy-webchat-root="true"] button.webchat-toggle-button:hover {
+  transform: scale(1.03) !important;
+  transform-origin: center center !important;
+  background-color: #0369a1 !important;
+  filter: none !important;
+}
+
+/* Strip every descendant's hover background/filter so the inner darker circle
+   Cognigy paints (small div/span on top of the button) becomes invisible. */
+#webchatWindowToggleButton:hover *,
+#webchatWindowToggleButton:hover *::before,
+#webchatWindowToggleButton:hover *::after,
+button.webchat-toggle-button:hover *,
+button.webchat-toggle-button:hover *::before,
+button.webchat-toggle-button:hover *::after,
+button[data-cognigy-webchat-toggle="true"]:hover *,
+button[data-cognigy-webchat-toggle="true"]:hover *::before,
+button[data-cognigy-webchat-toggle="true"]:hover *::after {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Co-scale the WebRTC avatar that sits underneath the webchat toggle so the
+   stack grows as one unit on hover. Webchat button is fixed-positioned over
+   the WebRTC avatar — different DOM trees, so we need a cross-tree trigger
+   via body:has(). */
+.webrtc_widget_content_logo,
+.webrtc_widget_content_logo .webrtc_widget_avatar {
+  transition: transform 0.15s ease !important;
+  transform-origin: center center !important;
+}
+body:has(button[data-cognigy-webchat-toggle="true"]:hover) .webrtc_widget_content_logo,
+body:has(button[data-cognigy-webchat-toggle="true"]:hover) .webrtc_widget_content_logo .webrtc_widget_avatar {
+  transform: scale(1.03) !important;
+}
+
+/* Webchat toggle icon — keep it white so it stays readable on the colored button. */
+#webchatWindowToggleButton svg,
+#webchatWindowToggleButton svg path,
+button.webchat-toggle-button svg,
+button.webchat-toggle-button svg path { fill: #ffffff !important; color: #ffffff !important; }
+
+/* When the webchat is mounted alongside the WebRTC widget, the chat toggle
+   overlays the WebRTC avatar area — so blank the avatar (image + SVG) and
+   fill the underlying circle with the demo's primary color. */
+body:has(button[data-cognigy-webchat-toggle="true"]) .webrtc_widget_content_logo .webrtc_widget_avatar {
+  background-image: none !important;
+  background-color: #0369a1 !important;
+}
+body:has(button[data-cognigy-webchat-toggle="true"]) .webrtc_widget_content_logo .webrtc_widget_avatar svg {
+  display: none !important;
+}
+
+/* Stop the WebRTC avatar pulse when the chat icon is sitting on top of it. */
+body:has(button[data-cognigy-webchat-toggle="true"]) .webrtc_widget_avatar {
+  animation: none !important;
+}
+
+/* Stop Cognigy's "burst" animation on the webchat toggle too. */
+#webchatWindowToggleButton,
+button.webchat-toggle-button,
+button.webchat-toggle-button.burst,
+button[data-cognigy-webchat-toggle="true"],
+#webchatWindowToggleButton *,
+button.webchat-toggle-button * { animation: none !important; }

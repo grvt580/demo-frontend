@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OneTechSupport — Talk to Sora</title>
+  <meta name="description" content="Chat or call Sora, the OneTechSupport AI Agent, for password resets, VPN troubleshooting, device health checks and IT/HR questions.">
+  <link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+
+  <section class="demo-hero-bg">
+    <div class="demo-hero-photo" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <span>24/7</span>&nbsp;·&nbsp;<span>English · Hinglish · Spanish · German</span>
+      </div>
+
+      <h1>How can <span class="accent">OneTechSupport</span> help you today?</h1>
+
+      <p class="hero-sub">
+        I'm Sora, your employee support specialist. I can run a device health check,
+        fix your VPN, reset an app password, or answer an IT or HR question.
+      </p>
+
+      <button class="hero-input-fake" id="heroFakeInput" type="button" aria-label="Open chat with Sora">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Ask me things like <b>&ldquo;my VPN won&rsquo;t connect&rdquo;</b> or <b>&ldquo;reset my password&rdquo;</b></span>
+      </button>
+
+      <p class="hero-hint"><span class="dot"></span> Use the call or chat button to start</p>
+    </div>
+  </section>
+
+  <script src="config.js"></script>
+
+  <!-- Webchat v3 -->
+  <link rel="stylesheet" href="css/webchat.css">
+  <script src="https://github.com/Cognigy/Webchat/releases/latest/download/webchat.js"></script>
+  <script>
+    initWebchat(window.DEMO_CONFIG.webchatConfigUrl, {
+      settings: {
+        colors: { primaryColor: window.DEMO_CONFIG.primaryColor },
+        behavior: { enableTypingIndicator: true }
+      }
+    });
+  </script>
+
+  <!-- Click-to-Call (WebRTC) -->
+  <link rel="stylesheet" href="css/webrtc.css">
+  <script src="https://github.com/Cognigy/click-to-call-widget/releases/latest/download/webRTCWidget.js"></script>
+  <script>
+    addEventListener("load", function () {
+      if (window.initWebRTCWidget) {
+        window.initWebRTCWidget(window.DEMO_CONFIG.webrtcConfigUrl);
+      }
+    });
+  </script>
+
+  <!-- The hero's fake input bar just opens the real webchat widget -->
+  <script>
+    document.getElementById("heroFakeInput").addEventListener("click", function () {
+      var btn =
+        document.getElementById("webchatWindowToggleButton") ||
+        document.querySelector('button[data-cognigy-webchat-toggle="true"]') ||
+        document.querySelector("button.webchat-toggle-button");
+      if (btn) btn.click();
+    });
+  </script>
+
+</body>
+</html>

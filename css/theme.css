@@ -1,0 +1,139 @@
+/* ── Theme tokens ─────────────────────────────────────────────────
+   Edit any of these to retheme the whole page at once. Colors are HSL
+   channels "H S% L%" (no hsl() wrapper, no commas); --radius is any CSS length. */
+:root {
+  --primary: 201 96% 32%;          /* #0369a1 — buttons, links, active accents */
+  --primary-foreground: 0 0% 100%; /* text/icons that sit on primary */
+  --background: 210 20% 98%;       /* page background below the hero */
+  --foreground: 222 47% 11%;       /* default text color */
+  --accent: 199 89% 94%;           /* hover / selected surfaces */
+  --border: 214 32% 91%;           /* card & input borders */
+  --ring: 201 96% 32%;             /* focus outline */
+  --radius: 0.75rem;               /* corner roundness */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* ── Hero ──────────────────────────────────────────────────────── */
+.demo-hero-bg {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 64px 24px;
+  background: linear-gradient(135deg, #0c4a6e, #0369a1 55%, #082f49);
+}
+
+/* Subtle tech-pattern texture behind the hero content. Replace with your
+   own background-image (any https URL or data: URI) if you'd rather use a
+   photo — lower the opacity to show more of the gradient underneath. */
+.demo-hero-photo {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.18) 1px, transparent 0);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  text-align: center;
+  color: #fff;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #e0f2fe;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
+  padding: 8px 18px;
+  margin-bottom: 28px;
+}
+
+.hero-inner h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+}
+
+.hero-inner h1 .accent {
+  color: #7dd3fc;
+}
+
+.hero-sub {
+  font-size: 17px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.86);
+  max-width: 560px;
+  margin: 0 auto 36px;
+}
+
+.hero-input-fake {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 18px 22px;
+  background: #fff;
+  color: hsl(var(--foreground));
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.28);
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.hero-input-fake:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.34);
+}
+.hero-input-fake:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+.hero-input-fake svg { flex: 0 0 auto; color: hsl(var(--primary)); }
+.hero-input-fake span { text-align: left; color: #475569; }
+.hero-input-fake span b { color: hsl(var(--foreground)); font-weight: 600; }
+
+.hero-hint {
+  margin: 22px 0 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-hint .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.25);
+}
+
+@media (max-width: 640px) {
+  .hero-input-fake { flex-direction: row; padding: 14px 16px; }
+  .hero-sub { font-size: 15px; }
+}
