@@ -276,6 +276,7 @@ button[data-cognigy-webchat-toggle="true"] {
 .stage-banner.tone-success { background: linear-gradient(135deg, #065f46, #059669 65%, #10b981); }
 .stage-banner.tone-warn { background: linear-gradient(135deg, #7c2d12, #c2410c 65%, #ea580c); }
 .stage-banner.tone-danger { background: linear-gradient(135deg, #7f1d1d, #b91c1c 65%, #dc2626); }
+.stage-banner.tone-close { background: #0f172a; }
 
 .stage-icon-badge {
   width: 52px;
@@ -421,6 +422,24 @@ button[data-cognigy-webchat-toggle="true"] {
 
 .stage-divider { height: 1px; background: hsl(var(--border)); margin: 18px 0 14px; }
 .stage-prompt { text-align: center; font-size: 13.5px; color: #64748b; }
+
+.stage-cta {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 26px;
+  background: hsl(var(--primary));
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stage-cta:hover { background: #0ea5e9; transform: translateY(-1px); box-shadow: 0 10px 24px rgba(2, 6, 23, 0.25); }
+.stage-cta:active { transform: translateY(0) scale(0.98); }
+.stage-cta:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
 @media (max-width: 640px) {
   .stage-wrap { max-width: 100%; }

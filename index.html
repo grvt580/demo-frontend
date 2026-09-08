@@ -83,6 +83,23 @@
         }
       });
     });
+
+    // Auto-greeting: the flow always answers a session's first message with a
+    // fixed "Hi, I'm Sora..." line regardless of what was sent, so the very
+    // first time the employee opens the widget we silently send an empty
+    // message to trigger it — no visible user bubble, no typing required.
+    // Home Screen is disabled on this endpoint so opening goes straight to
+    // the chat interface instead of a "Start conversation" gate.
+    window.otsAutoGreet = function () {
+      if (sessionStorage.getItem("otsAutoGreetSent")) return;
+      if (!window.webchat || typeof window.webchat.sendMessage !== "function") return;
+      sessionStorage.setItem("otsAutoGreetSent", "1");
+      // Empty text + a non-empty data object slips past the widget's
+      // "no text and no data" send guard while leaving text empty, so no
+      // user bubble is rendered — the flow ignores the payload anyway and
+      // always answers a session's first turn with the fixed greeting.
+      window.webchat.sendMessage("", { ots_trigger: "greet_on_open" });
+    };
   </script>
 
   <!-- Click-to-Call (WebRTC) -->
@@ -115,6 +132,7 @@
         document.querySelector('button[data-cognigy-webchat-toggle="true"]') ||
         document.querySelector("button.webchat-toggle-button");
       if (btn) btn.click();
+      if (window.otsAutoGreet) window.otsAutoGreet();
     }
     function otsStartCall() {
       var btn =

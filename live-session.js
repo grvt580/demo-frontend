@@ -50,6 +50,12 @@
     heroEl.hidden = true;
     stageWrap.hidden = false;
     flushPendingTerminals();
+    wireCtas();
+  }
+
+  function wireCtas() {
+    var ctas = stageCard.querySelectorAll('[data-cta="home"]');
+    for (var i = 0; i < ctas.length; i++) ctas[i].addEventListener("click", showHero);
   }
 
   function esc(s) {
@@ -189,6 +195,10 @@
     return '<div class="stage-divider"></div><div class="stage-prompt">' + esc(text) + "</div>";
   }
 
+  function renderCta(label) {
+    return '<button type="button" class="stage-cta" data-cta="home">' + esc(label) + "</button>";
+  }
+
   var RENDERERS = {
     employee_verify: function (m) {
       showStage(
@@ -254,18 +264,23 @@
     vpn_diagnostic: function (m) {
       var resolved = m.resolved === "true" || m.resolved === true;
       var attempted = m.remediationAttempted === "true" || m.remediationAttempted === true;
+      // A problem was diagnosed if the flow gave us any error detail — this is
+      // independent of whether it was later fixed, so the original finding
+      // stays red even when remediation went on to resolve it.
+      var hasIssue = !!(m.code || m.title || m.details);
       var lines = [
         { text: "$ vpn --diagnose --source intune", cls: "muted" },
         { text: "Connecting to Intune management interface...", cls: "muted" },
         { text: "Policy sync initialized", cls: "muted" }
       ];
-      lines.push({ text: "Status: " + (resolved ? "OK" : "ConfigurationError"), cls: resolved ? "ok" : "err" });
-      if (m.code) lines.push({ text: "Code: " + m.code, cls: resolved ? "muted" : "err" });
-      if (m.title || m.details) lines.push({ text: (m.title || "VPN issue") + (m.details ? ": " + m.details : ""), cls: resolved ? "muted" : "err" });
+      lines.push({ text: "Status: " + (hasIssue ? "ConfigurationError" : "OK"), cls: hasIssue ? "err" : "ok" });
+      if (m.code) lines.push({ text: "Code: " + m.code, cls: "err" });
+      if (m.details) lines.push({ text: m.details, cls: "warn" });
+      else if (m.title && hasIssue) lines.push({ text: m.title, cls: "warn" });
       if (attempted) {
         lines.push({ text: "Starting remediation via " + (m.remediationMethod || "automated fix") + "...", cls: "muted" });
-        lines.push({ text: "Remediation: " + (m.remediationStatus || "Completed"), cls: "ok" });
-        lines.push({ text: "VPN configuration successfully restored", cls: "ok" });
+        lines.push({ text: "Remediation: " + (m.remediationStatus || (resolved ? "Completed" : "Failed")), cls: resolved ? "ok" : "err" });
+        if (resolved) lines.push({ text: "VPN configuration successfully restored", cls: "ok" });
       }
       showStage(
         renderPlainHead(
@@ -311,9 +326,10 @@
 
     call_ended: function (m) {
       showStage(
-        renderBanner("info", "wave", "SESSION", "Thanks for reaching out") +
+        renderBanner("close", "check", "SUPPORT", "Thanks for stopping by") +
         '<div class="stage-body">' +
-          '<p class="stage-lead">' + esc(m.message || "Thanks for contacting the service desk.") + "</p>" +
+          '<p class="stage-lead">' + esc(m.message || ("Thanks for contacting " + CUSTOMER + ". Have a good day.")) + "</p>" +
+          renderCta("Back to the help center") +
         "</div>"
       );
     },
