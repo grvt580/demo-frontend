@@ -149,27 +149,45 @@ body {
   z-index: 60;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 10px;
   background: #0f172a;
   border-radius: 9999px;
-  padding: 6px;
+  padding: 6px 18px 6px 6px;
   box-shadow: 0 12px 32px rgba(2, 6, 23, 0.35);
 }
+.dock-label {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+}
 .dock-btn {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
   border: none;
   border-radius: 9999px;
-  background: transparent;
+  background: hsl(var(--primary));
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
-.dock-btn:hover { background: rgba(255, 255, 255, 0.14); transform: scale(1.05); }
+.dock-btn:hover {
+  background: #0ea5e9;
+  transform: scale(1.08);
+  box-shadow: 0 0 0 5px rgba(125, 211, 252, 0.3);
+}
+.dock-btn:active { transform: scale(0.96); }
 .dock-btn:focus-visible { outline: 2px solid #7dd3fc; outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .dock-label { display: none; }
+  .contact-dock { padding: 6px; }
+}
 
 /* Hide Cognigy's own floating controls — our dock proxies clicks to them
    (via .click() in index.html), so they stay fully functional, just
