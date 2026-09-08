@@ -147,10 +147,14 @@
     },
 
     password_reset: function (m) {
+      var toManager = m.deliveryMethod === "manager";
+      var destination = toManager
+        ? "sent to your manager, " + esc(m.managerName || "your manager") + (m.managerEmail ? " (" + esc(m.managerEmail) + ")" : "")
+        : "sent to " + esc(m.email || "your email");
       addEntry(
         "Password reset sent",
         [
-          (m.software ? esc(m.software) + " · " : "") + "sent to " + esc(m.email || "your email"),
+          (m.software ? esc(m.software) + " · " : "") + destination,
           m.expiresInMinutes ? "Expires in " + esc(m.expiresInMinutes) + " minutes" : ""
         ],
         "success"
