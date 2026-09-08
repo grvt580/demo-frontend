@@ -193,6 +193,17 @@ button[data-cognigy-webchat-toggle="true"] {
   box-shadow: none !important;
   border: none !important;
 }
+/* Without this, the widget's own (invisible but full-size) idle shell sits
+   on top of our dock and silently swallows real clicks meant for it — the
+   dock's buttons still work via .click() (bypasses hit-testing) but stop
+   responding to actual pointer clicks once this shell has rendered at full
+   size. Each ancestor layer sets its own pointer-events, so the whole chain
+   needs it, not just the innermost one. */
+.webrtc_widget_outer_wrapper:has(.webrtc_widget_content_container_idle),
+.webrtc_widget_content_stack:has(.webrtc_widget_content_container_idle),
+.webrtc_widget_container:has(.webrtc_widget_content_container_idle) {
+  pointer-events: none !important;
+}
 .webrtc_widget_content_container_idle {
   visibility: hidden !important;
   pointer-events: none !important;
