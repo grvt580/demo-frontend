@@ -1,6 +1,7 @@
 /**
- * Live Session panel — renders metadata_notify events pushed by the
- * OneTechSupport flow in real time, over both channels:
+ * Live Session stage — renders metadata_notify events pushed by the
+ * OneTechSupport flow in real time, over both channels, as full "screens"
+ * in the main content area (replacing the hero copy), not a side popup:
  *
  *   Chat:  metadata_notify's "Send Metadata Chat" code node runs
  *          api.output("", context.notifyMeta) -> arrives client-side as
@@ -27,50 +28,33 @@
  *   password_reset   -> temp password/reset confirmation
  *   live_agent       -> handoff to a human
  *   call_ended       -> closing message
- *   home             -> conversation reset to the main menu (clears the log)
+ *   home             -> conversation reset to the main menu (back to hero)
  */
 (function () {
-  var panel = document.getElementById("livePanel");
-  var log = document.getElementById("liveLog");
-  var closeBtn = document.getElementById("livePanelClose");
+  var CUSTOMER = (window.DEMO_CONFIG && window.DEMO_CONFIG.customerName) || "Support";
 
-  closeBtn.addEventListener("click", function () {
-    panel.hidden = true;
-  });
+  var heroEl = document.getElementById("heroContent");
+  var stageWrap = document.getElementById("stageWrap");
+  var stageCard = document.getElementById("stageCard");
+  var stageHome = document.getElementById("stageHome");
+
+  stageHome.addEventListener("click", showHero);
+
+  function showHero() {
+    stageWrap.hidden = true;
+    heroEl.hidden = false;
+  }
+
+  function showStage(html) {
+    stageCard.innerHTML = html;
+    heroEl.hidden = true;
+    stageWrap.hidden = false;
+  }
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
-  }
-
-  function timeNow() {
-    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
-
-  function addEntry(title, detailLines, tone) {
-    panel.hidden = false;
-    var el = document.createElement("div");
-    el.className = "live-entry" + (tone ? " tone-" + tone : "");
-    var detailHtml = (detailLines || [])
-      .filter(Boolean)
-      .map(function (l) { return "<div>" + l + "</div>"; })
-      .join("");
-    el.innerHTML =
-      '<div class="live-entry-title"><span>' + esc(title) + '</span>' +
-      '<span class="live-entry-time">' + timeNow() + "</span></div>" +
-      (detailHtml ? '<div class="live-entry-detail">' + detailHtml + "</div>" : "");
-    log.appendChild(el);
-    log.scrollTop = log.scrollHeight;
-  }
-
-  function addDivider(text) {
-    panel.hidden = false;
-    var el = document.createElement("div");
-    el.className = "live-entry-divider";
-    el.textContent = text;
-    log.appendChild(el);
-    log.scrollTop = log.scrollHeight;
   }
 
   function fmtDate(iso) {
@@ -80,25 +64,127 @@
     return d.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   }
 
+  var ICONS = {
+    lock: '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    key: '<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="15" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M11 12l9-9m-4 4 2 2m-6 1 2 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    person: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    wave: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12c1.5-3 3-3 4.5 0s3 3 4.5 0 3-3 4.5 0 3 3 4.5 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 4h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 6.2 2 2 0 0 1 6 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    code: '<svg viewBox="0 0 24 24" fill="none"><path d="m8 8-4 4 4 4m8-8 4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 2 20h20L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 10v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17" r="0.8" fill="currentColor"/></svg>'
+  };
+
+  function iconHtml(name) {
+    return '<span class="stage-icon-svg">' + (ICONS[name] || ICONS.check) + "</span>";
+  }
+
+  function renderBanner(tone, icon, eyebrow, titleHtml) {
+    return (
+      '<div class="stage-banner tone-' + tone + '">' +
+        '<div class="stage-icon-badge">' + iconHtml(icon) + "</div>" +
+        '<div class="stage-eyebrow">' + esc(CUSTOMER.toUpperCase()) + " &middot; " + esc(eyebrow) + "</div>" +
+        '<div class="stage-title">' + titleHtml + "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderPlainHead(eyebrow, title, subtitle) {
+    return (
+      '<div class="stage-plainhead">' +
+        '<div class="stage-eyebrow stage-eyebrow-dark">' + esc(CUSTOMER.toUpperCase()) + " &middot; " + esc(eyebrow) + "</div>" +
+        '<div class="stage-title stage-title-dark">' + esc(title) + "</div>" +
+        (subtitle ? '<div class="stage-subtitle">' + esc(subtitle) + "</div>" : "") +
+      "</div>"
+    );
+  }
+
+  function renderRow(icon, label, value) {
+    if (!value) return "";
+    return (
+      '<div class="stage-row">' +
+        '<div class="stage-row-icon">' + iconHtml(icon) + "</div>" +
+        "<div><div class=\"stage-row-label\">" + esc(label) + "</div>" +
+        '<div class="stage-row-value">' + esc(value) + "</div></div>" +
+      "</div>"
+    );
+  }
+
+  function renderNote(tone, icon, html) {
+    if (!html) return "";
+    return (
+      '<div class="stage-note tone-' + tone + '">' +
+        '<div class="stage-note-icon">' + iconHtml(icon) + "</div>" +
+        "<div>" + html + "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderStatus(tone, title, text) {
+    return (
+      '<div class="stage-status tone-' + tone + '">' +
+        '<div class="stage-status-icon">' + iconHtml(tone === "success" ? "check" : "warn") + "</div>" +
+        "<div><div class=\"stage-status-title\">" + esc(title) + "</div>" +
+        (text ? '<div class="stage-status-text">' + esc(text) + "</div>" : "") + "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderTerminal(title, lines) {
+    var body = (lines || [])
+      .map(function (l) { return '<div class="term-line term-' + (l.cls || "muted") + '">' + esc(l.text) + "</div>"; })
+      .join("");
+    return (
+      '<div class="stage-terminal">' +
+        '<div class="stage-terminal-title"><span class="term-dot d1"></span><span class="term-dot d2"></span><span class="term-dot d3"></span><span>' + esc(title) + "</span></div>" +
+        '<div class="stage-terminal-body">' + body + "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderOtp() {
+    var boxes = "";
+    for (var i = 0; i < 6; i++) boxes += '<div class="otp-box"></div>';
+    return '<div class="stage-otp">' + boxes + "</div>";
+  }
+
+  function renderPrompt(text) {
+    if (!text) return "";
+    return '<div class="stage-divider"></div><div class="stage-prompt">' + esc(text) + "</div>";
+  }
+
   var RENDERERS = {
     employee_verify: function (m) {
-      addEntry(
-        "Verifying employee identity",
-        [m.maskedPhone ? "Sending a code to " + esc(m.maskedPhone) : "Checking employee record…"],
-        "info"
+      showStage(
+        renderBanner("info", "lock", "VERIFICATION", "Check your phone") +
+        '<div class="stage-body">' +
+          '<p class="stage-lead">' +
+            (m.maskedPhone
+              ? "I've sent a six-digit code by text to <b>" + esc(m.maskedPhone) + "</b>."
+              : "Sending a verification code&hellip;") +
+          "</p>" +
+          renderOtp() +
+          renderNote("info", "shield", "Nothing sensitive gets touched until you're verified. The code expires in five minutes, and I'll never read it out to you.") +
+          renderPrompt("Read the code back to me and we'll keep going.") +
+        "</div>"
       );
     },
 
     employee_found: function (m) {
-      var name = [m.firstName, m.lastName].filter(Boolean).join(" ") || "Employee";
-      addEntry(
-        "Identity confirmed — " + esc(name),
-        [
-          m.email ? esc(m.email) : "",
-          m.phoneNumber ? esc(m.phoneNumber) : "",
-          "MFA: " + esc(m.mfaStatus || "Unknown")
-        ],
-        "success"
+      var name = [m.firstName, m.lastName].filter(Boolean).join(" ") || "there";
+      var mfaOk = /^configured$/i.test(m.mfaStatus || "");
+      showStage(
+        renderBanner("success", "check", "VERIFIED", "Welcome back, " + esc(name)) +
+        '<div class="stage-body">' +
+          renderRow("mail", "Work email", m.email) +
+          renderRow("phone", "Mobile", m.phoneNumber) +
+          (mfaOk ? "" : renderNote("warn", "warn",
+            "<b>Multi-factor authentication</b><br>Not configured &mdash; worth setting up while we're here, it takes about two minutes in Microsoft Entra ID.")) +
+          renderPrompt("What can I help you with — device check, VPN, or a password reset?") +
+        "</div>"
       );
     },
 
@@ -107,70 +193,100 @@
       var devices = Array.isArray(m.devices) ? m.devices : [];
       var lines = devices.map(function (d) {
         var flag = d.compliance && d.compliance !== "compliant";
-        var extra = (d.issues && d.issues.length) ? " — " + esc(d.issues.join(", ")) : "";
-        return (flag ? "⚠️ " : "✅ ") + esc(d.name || "Device") +
-          " (" + esc(d.os || "") + (d.osVersion ? " " + esc(d.osVersion) : "") + ") · " +
-          esc(d.compliance || "unknown") + extra;
+        var extra = (d.issues && d.issues.length) ? " — " + d.issues.join(", ") : "";
+        return {
+          text: (flag ? "⚠ " : "✓ ") + (d.name || "Device") + " (" + (d.os || "") + (d.osVersion ? " " + d.osVersion : "") + ") · " + (d.compliance || "unknown") + extra,
+          cls: flag ? "warn" : "ok"
+        };
       });
       if (m.scanInterval) {
-        lines.push(
-          "Next scan: " + esc(m.scanInterval) +
-          (m.scanDayOfWeek ? " on " + esc(m.scanDayOfWeek) : "") +
-          (m.scanTime ? " at " + esc(m.scanTime) : "") +
-          (m.scanTimezone ? " (" + esc(m.scanTimezone) + ")" : "")
-        );
+        lines.push({ text: "Next scan: " + m.scanInterval + (m.scanDayOfWeek ? " on " + m.scanDayOfWeek : "") + (m.scanTime ? " at " + m.scanTime : ""), cls: "muted" });
       }
-      addEntry(
-        "Device health check — " + (issues > 0 ? issues + " issue" + (issues > 1 ? "s" : "") + " found" : "all clear"),
-        lines,
-        issues > 0 ? "warn" : "success"
+      var resolved = issues === 0;
+      showStage(
+        renderPlainHead(
+          "DEVICE HEALTH",
+          resolved ? "All devices healthy" : issues + " issue" + (issues > 1 ? "s" : "") + " found",
+          "Scanned " + devices.length + " device" + (devices.length === 1 ? "" : "s") + " across your account."
+        ) +
+        '<div class="stage-body">' +
+          renderStatus(resolved ? "success" : "warn", resolved ? "All clear" : "Attention needed",
+            resolved ? "Every managed device is compliant and up to date." : "One or more devices need a fix — details below.") +
+          renderTerminal("intune · device-health", lines) +
+          renderPrompt(resolved ? "Anything else I can check for you?" : "Want me to walk you through fixing the flagged device?") +
+        "</div>"
       );
     },
 
     vpn_diagnostic: function (m) {
       var resolved = m.resolved === "true" || m.resolved === true;
       var attempted = m.remediationAttempted === "true" || m.remediationAttempted === true;
-      var lines = [];
-      if (m.title || m.details) lines.push(esc(m.title || "VPN issue") + (m.details ? ": " + esc(m.details) : ""));
-      if (m.code) lines.push("Code: " + esc(m.code));
+      var lines = [
+        { text: "$ vpn --diagnose --source intune", cls: "muted" },
+        { text: "Connecting to Intune management interface...", cls: "muted" },
+        { text: "Policy sync initialized", cls: "muted" }
+      ];
+      lines.push({ text: "Status: " + (resolved ? "OK" : "ConfigurationError"), cls: resolved ? "ok" : "err" });
+      if (m.code) lines.push({ text: "Code: " + m.code, cls: resolved ? "muted" : "err" });
+      if (m.title || m.details) lines.push({ text: (m.title || "VPN issue") + (m.details ? ": " + m.details : ""), cls: resolved ? "muted" : "err" });
       if (attempted) {
-        lines.push(
-          "Remediation: " + esc(m.remediationMethod || "automated fix") +
-          (m.remediationStatus ? " — " + esc(m.remediationStatus) : "")
-        );
+        lines.push({ text: "Starting remediation via " + (m.remediationMethod || "automated fix") + "...", cls: "muted" });
+        lines.push({ text: "Remediation: " + (m.remediationStatus || "Completed"), cls: "ok" });
+        lines.push({ text: "VPN configuration successfully restored", cls: "ok" });
       }
-      addEntry(
-        "VPN diagnostic — " + (resolved ? "Resolved" : "Needs escalation"),
-        lines,
-        resolved ? "success" : "danger"
+      showStage(
+        renderPlainHead(
+          "NETWORK DIAGNOSTICS",
+          m.title || (resolved ? "VPN issue resolved" : "VPN configuration failed"),
+          resolved ? "Detected and fixed while we were talking." : "Detected while we were talking — this needs a follow-up."
+        ) +
+        '<div class="stage-body">' +
+          renderStatus(resolved ? "success" : "danger", resolved ? "Resolved" : "Needs escalation",
+            resolved ? "Your VPN profile was re-pushed and applied successfully." : (m.details || "Automated remediation didn't resolve this.")) +
+          renderTerminal("intune · vpn-diagnostic", lines) +
+          renderPrompt(resolved ? "Give it a try — is your connection working now?" : "I'll flag this for the network team — anything else in the meantime?") +
+        "</div>"
       );
     },
 
     password_reset: function (m) {
       var toManager = m.deliveryMethod === "manager";
-      var destination = toManager
-        ? "sent to your manager, " + esc(m.managerName || "your manager") + (m.managerEmail ? " (" + esc(m.managerEmail) + ")" : "")
-        : "sent to " + esc(m.email || "your email");
-      addEntry(
-        "Password reset sent",
-        [
-          (m.software ? esc(m.software) + " · " : "") + destination,
-          m.expiresInMinutes ? "Expires in " + esc(m.expiresInMinutes) + " minutes" : ""
-        ],
-        "success"
+      showStage(
+        renderBanner("success", "key", "PASSWORD RESET", esc(m.software || "Account") + " password reset") +
+        '<div class="stage-body">' +
+          renderRow("code", "Application", m.software) +
+          (toManager
+            ? renderRow("mail", "Temp password sent to", (m.managerName || "your manager") + (m.managerEmail ? " (" + m.managerEmail + ")" : ""))
+            : renderRow("mail", "Temp password sent to", m.email)) +
+          renderRow("clock", "Reset at", fmtDate(m.resetAt)) +
+          renderNote("info", "mail", toManager
+            ? "Since you don't have access to your own email or Teams right now, your manager will pass the temporary password along."
+            : ("A temporary password is on its way to your inbox" + (m.expiresInMinutes ? " and expires in " + esc(m.expiresInMinutes) + " minutes" : "") + ". You'll be asked to set a new one the first time you sign in.")) +
+          renderPrompt("Try signing in and let me know if it works — anything else I can unlock?") +
+        "</div>"
       );
     },
 
     live_agent: function () {
-      addEntry("Transferring to a live agent", ["Connecting you with a specialist…"], "warn");
+      showStage(
+        renderBanner("warn", "person", "LIVE AGENT", "Transferring you now") +
+        '<div class="stage-body">' +
+          '<p class="stage-lead">Connecting you with a specialist&hellip; hang tight.</p>' +
+        "</div>"
+      );
     },
 
     call_ended: function (m) {
-      addEntry("Session ended", [esc(m.message || "Thanks for contacting the service desk.")], "info");
+      showStage(
+        renderBanner("info", "wave", "SESSION", "Thanks for reaching out") +
+        '<div class="stage-body">' +
+          '<p class="stage-lead">' + esc(m.message || "Thanks for contacting the service desk.") + "</p>" +
+        "</div>"
+      );
     },
 
     home: function () {
-      addDivider("New session");
+      showHero();
     }
   };
 
@@ -200,7 +316,7 @@
     if (renderer) {
       renderer(parsed.meta);
     } else {
-      addEntry(parsed.action, [], "info");
+      showStage(renderPlainHead("UPDATE", parsed.action.replace(/_/g, " "), "") + '<div class="stage-body"></div>');
     }
   }
 

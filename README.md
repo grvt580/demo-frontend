@@ -7,29 +7,29 @@ Live agent capabilities demoed here: password reset, VPN troubleshooting, device
 ## Structure
 
 ```
-index.html          hero page + widget mount/init scripts + live session panel markup
+index.html          hero/main-stage page + widget mount/init scripts + contact dock markup
 config.js           per-vertical settings (customer name, avatar, endpoint URLs, brand color)
-live-session.js      parses metadata_notify events and renders the live session panel
-css/theme.css        page theme tokens + hero styling + live session panel styling
+live-session.js      parses metadata_notify events and renders them as main-stage cards
+css/theme.css        page theme tokens + hero styling + main-stage card + contact dock styling
 css/webchat.css       Cognigy Webchat v3 branding overrides
 css/webrtc.css        Cognigy Click-to-Call (WebRTC) branding overrides
 assets/sora-avatar.png  Sora's agent avatar, pulled from the live Cognigy project
 ```
 
-## Live session panel (metadata_notify)
+## Main stage (metadata_notify)
 
-The OneTechSupport flow pushes structured progress updates mid-conversation via a shared `metadata_notify` sub-flow — e.g. "verifying identity", "device health check", "VPN diagnostic result", "password reset sent". `live-session.js` listens for these on both channels and renders them as a real-time timeline, bottom-left on the page:
+The OneTechSupport flow pushes structured progress updates mid-conversation via a shared `metadata_notify` sub-flow — e.g. "verifying identity", "device health check", "VPN diagnostic result", "password reset sent". `live-session.js` listens for these on both channels and renders each as a full card **in the main content area**, replacing the hero copy in place (`#heroContent` swaps for `#stageWrap`/`#stageCard`) — not a side popup. A "← Home" link returns to the hero without ending the session; the chat window (when open) stays docked on its own, so the two update independently.
 
 - **Chat** — `metadata_notify`'s "Send Metadata Chat" code node runs `api.output("", context.notifyMeta)`. Client-side this arrives via the [Webchat Analytics API](https://github.com/Cognigy/Webchat/blob/main/docs/analytics-api.md): `webchat.registerAnalyticsService(event => ...)`, with `event.type === "webchat/incoming-message"` and the payload in `event.payload.data`.
 - **Voice** — `metadata_notify`'s "Send Metadata WebRTC" node is a native `sendMetadata` (Voice Gateway) node, delivered over the call's SIP INFO channel. Client-side this arrives via `session.on("newInfo", data => ...)` (from `widget.on("newRTCSession", ...)`), with the payload in `data.info.body`.
 
-Both deliver the same string: `context.notifyMeta`, which is `JSON.stringify({ action, metaJson })` where `metaJson` is *itself* a JSON string — `live-session.js` parses both layers. The 8 `action` values the flow currently emits (verified directly from the flow's exported node code, not guessed): `employee_verify`, `employee_found`, `device_health`, `vpn_diagnostic`, `password_reset`, `live_agent`, `call_ended`, `home` (the last one clears the timeline — it marks a return to the main menu). Each has its own renderer in `live-session.js`; unrecognized actions still render generically rather than being dropped silently, so a new `action` the flow starts sending shows up immediately instead of disappearing.
+Both deliver the same string: `context.notifyMeta`, which is `JSON.stringify({ action, metaJson })` where `metaJson` is *itself* a JSON string — `live-session.js` parses both layers. The 8 `action` values the flow currently emits (verified directly from the flow's exported node code, not guessed): `employee_verify`, `employee_found`, `device_health`, `vpn_diagnostic`, `password_reset`, `live_agent`, `call_ended`, `home` (the last one returns to the hero — it marks a return to the main menu). Each has its own card renderer in `live-session.js`; unrecognized actions still render a generic card rather than being dropped silently, so a new `action` the flow starts sending shows up immediately instead of disappearing.
 
 ## How it's wired
 
 - **Chat** — [Webchat v3](https://docs.cognigy.com/webchat/v3/embedding/hosted-script), loaded from `https://github.com/Cognigy/Webchat/releases/latest/download/webchat.js`, initialized against the **Webchat Main** endpoint on the OneTechSupport flow.
 - **Voice** — [Click-to-Call widget](https://docs.cognigy.com/click-to-call/embed) (WebRTC), loaded from `https://github.com/Cognigy/click-to-call-widget/releases/latest/download/webRTCWidget.js`, initialized against the **Voice Gateway** endpoint on the same flow. The widget's own live-transcript panel is what renders the conversation in real time during a call.
-- The hero's "Ask me things like..." bar isn't a real input — clicking it just opens the real webchat widget.
+- **Contact dock** — the chat-bubble/phone pill fixed bottom-right is our own markup (`#contactDock`), not the vendor widgets' default floating buttons. Cognigy's own toggle button and the Click-to-Call widget's pre-call avatar/button are visually hidden (kept functional, just off-canvas/invisible — see the hide rules in `theme.css`) so we control the look; the dock's buttons and the hero's "Ask me things like..." bar all just proxy a `.click()` to the real hidden controls (`otsOpenWebchat()` / `otsStartCall()` in `index.html`).
 
 Both endpoint tokens live in `config.js` — swap them there (not in the CSS files) if the endpoints are recreated.
 
