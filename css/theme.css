@@ -371,10 +371,24 @@ button[data-cognigy-webchat-toggle="true"] {
 .term-dot.d2 { background: #f59e0b; }
 .term-dot.d3 { background: #10b981; }
 .stage-terminal-body { padding: 12px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.7; }
+.term-line {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.term-line.term-line-show { opacity: 1; transform: translateY(0); }
 .term-line.term-muted { color: #64748b; }
 .term-line.term-ok { color: #34d399; }
 .term-line.term-warn { color: #fbbf24; }
 .term-line.term-err { color: #f87171; }
+.term-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: #94a3b8;
+  animation: termBlink 0.9s steps(1) infinite;
+}
+@keyframes termBlink { 50% { opacity: 0; } }
 
 .stage-divider { height: 1px; background: hsl(var(--border)); margin: 18px 0 14px; }
 .stage-prompt { text-align: center; font-size: 13.5px; color: #64748b; }

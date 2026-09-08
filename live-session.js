@@ -49,6 +49,7 @@
     stageCard.innerHTML = html;
     heroEl.hidden = true;
     stageWrap.hidden = false;
+    flushPendingTerminals();
   }
 
   function esc(s) {
@@ -133,16 +134,48 @@
     );
   }
 
+  var termCounter = 0;
+  var pendingTerminals = [];
+
   function renderTerminal(title, lines) {
-    var body = (lines || [])
-      .map(function (l) { return '<div class="term-line term-' + (l.cls || "muted") + '">' + esc(l.text) + "</div>"; })
-      .join("");
+    var id = "stage-term-" + (++termCounter);
+    pendingTerminals.push({ id: id, lines: lines || [] });
     return (
       '<div class="stage-terminal">' +
         '<div class="stage-terminal-title"><span class="term-dot d1"></span><span class="term-dot d2"></span><span class="term-dot d3"></span><span>' + esc(title) + "</span></div>" +
-        '<div class="stage-terminal-body">' + body + "</div>" +
+        '<div class="stage-terminal-body" id="' + id + '"></div>' +
       "</div>"
     );
+  }
+
+  // Reveals terminal lines one at a time (instead of dumping them in all at
+  // once) so a diagnostic card reads like a live/real-time update, matching
+  // the vendor tool's own streamed CLI output.
+  function animateTerminalLines(el, lines, i) {
+    var oldCursor = el.querySelector(".term-cursor");
+    if (oldCursor) oldCursor.remove();
+    if (i >= lines.length) return;
+    var l = lines[i];
+    var div = document.createElement("div");
+    div.className = "term-line term-" + (l.cls || "muted");
+    div.textContent = l.text;
+    el.appendChild(div);
+    requestAnimationFrame(function () { div.classList.add("term-line-show"); });
+    if (i + 1 < lines.length) {
+      var cursor = document.createElement("div");
+      cursor.className = "term-cursor";
+      el.appendChild(cursor);
+    }
+    setTimeout(function () { animateTerminalLines(el, lines, i + 1); }, 420);
+  }
+
+  function flushPendingTerminals() {
+    var jobs = pendingTerminals;
+    pendingTerminals = [];
+    jobs.forEach(function (job) {
+      var el = document.getElementById(job.id);
+      if (el) animateTerminalLines(el, job.lines, 0);
+    });
   }
 
   function renderOtp() {
