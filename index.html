@@ -90,9 +90,18 @@
     // message to trigger it — no visible user bubble, no typing required.
     // Home Screen is disabled on this endpoint so opening goes straight to
     // the chat interface instead of a "Start conversation" gate.
-    window.otsAutoGreet = function () {
+    window.otsAutoGreet = function (attemptsLeft) {
       if (sessionStorage.getItem("otsAutoGreetSent")) return;
-      if (!window.webchat || typeof window.webchat.sendMessage !== "function") return;
+      if (!window.webchat || typeof window.webchat.sendMessage !== "function") {
+        // The widget SDK (loaded from a GitHub release CDN) can still be
+        // initializing when the dock button is clicked right after page
+        // load — retry briefly instead of silently giving up, otherwise a
+        // fast click or a slow connection means no greeting ever fires.
+        if (attemptsLeft === undefined) attemptsLeft = 20; // ~5s at 250ms
+        if (attemptsLeft <= 0) return;
+        setTimeout(function () { window.otsAutoGreet(attemptsLeft - 1); }, 250);
+        return;
+      }
       sessionStorage.setItem("otsAutoGreetSent", "1");
       // Empty text + a non-empty data object slips past the widget's
       // "no text and no data" send guard while leaving text empty, so no
@@ -110,12 +119,35 @@
       if (window.initWebRTCWidget) {
         window.initWebRTCWidget(window.DEMO_CONFIG.webrtcConfigUrl).then(function (widget) {
           window.webrtcWidget = widget;
-          widget.on("newRTCSession", function (session) {
+
+          function onNewSession(session) {
             session.on("newInfo", function (data) {
               var body = data && data.info && data.info.body;
               if (body) window.LiveSession.handleRaw(body);
             });
-          });
+          }
+
+          // widget.on(event, handler) forwards straight to the widget's
+          // internal SIP user agent (see Cognigy/click-to-call-widget's
+          // VoiceBotWidget.tsx: `userAgentRef.current?.on(event, handler)`),
+          // and that user agent is only constructed once the endpoint's SIP
+          // config has finished loading (a separate async fetch, inside
+          // useSip()'s own effect). initWebRTCWidget's returned promise
+          // resolves as soon as the widget component has *mounted*, which
+          // can easily happen before that config fetch completes — so a
+          // single widget.on("newRTCSession", ...) call right after that
+          // promise resolves can silently attach to nothing (the optional
+          // chaining swallows it, no error, no signal back to us) and no
+          // voice metadata ever renders, on every call, not just sometimes.
+          // There's no public "ready"/off() API to wait on instead, so
+          // retry attaching for a few seconds — handleRaw below is
+          // deduped, so a rare double-attach is harmless.
+          var attempts = 0;
+          (function attachNewSessionListener() {
+            widget.on("newRTCSession", onNewSession);
+            attempts++;
+            if (attempts < 8) setTimeout(attachNewSessionListener, attempts < 4 ? 400 : 1000);
+          })();
         });
       }
     });

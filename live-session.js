@@ -358,7 +358,20 @@
     return { action: outer.action, meta: meta };
   }
 
+  // Guards against the same event being handled twice in quick succession —
+  // e.g. if the voice-channel listener ever ends up attached more than once
+  // (see the retry loop around widget.on("newRTCSession", ...) in
+  // index.html, which can't tell whether an earlier attach already
+  // succeeded and must err on the side of retrying).
+  var lastRaw = null;
+  var lastRawAt = 0;
+
   function handleRaw(raw) {
+    var now = Date.now();
+    if (raw === lastRaw && now - lastRawAt < 1000) return;
+    lastRaw = raw;
+    lastRawAt = now;
+
     var parsed = parseNotify(raw);
     if (!parsed) return;
     var renderer = RENDERERS[parsed.action];
